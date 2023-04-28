@@ -1,0 +1,56 @@
+#############################
+# Create dataset with ipyrad
+#############################
+
+# https://ipyrad.readthedocs.io/en/master/
+
+# Install ipyrad
+conda create -n ipyrad
+conda activate ipyrad
+conda install ipyrad -c conda-forge -c bioconda
+
+# create a ipyrad params file
+ipyrad -n test
+
+# Run ipyrad
+ipyrad -p params-test.txt -s 1234567
+
+
+# Error occured at step 7:
+
+#   Step 7: Filtering and formatting output files 
+# 
+#   Encountered an Error.
+#   Message: 
+# There are samples in this assembly that were not present in step 6. This is 
+# likely due to failed samples retained in the assembly from prior to step 5, or
+# branching/merging. Either branch and remove these samples, or run them through
+# step 6. The following samples are not in the step6 database:
+# {'C09'}
+# Simplest solution is to branch and remove these from the assembly.
+
+# branch and remove sample "C09" from the assembly
+ipyrad -p params-test.txt -b drop_C09 - C09
+
+# Run ipyrad again using new params file
+ipyrad -p params-drop_C09.txt -s 7
+
+# Output in folder "drop_C09_outfiles"
+
+# Rename output folder
+
+mv drop_C09_outfiles 1_ipyrad_output
+
+###############################
+# Make a phylogeny with IQTree
+###############################
+
+# Performed on the UC Davis Peloton cluster
+
+# Samples A12, B08, B12, E08, F08, and G08 were entirely missing data
+	# These samples were removed and a new file was created:
+		# "drop_C09_A12_B08_B12_E08_F08_G08.phy"
+
+iqtree -s drop_C09_A12_B08_B12_E08_F08_G08.phy -m MFP -bb 1000 -nt 16
+
+# output file "drop_C09_A12_B08_B12_E08_F08_G08.phy.contree" used for final tree
